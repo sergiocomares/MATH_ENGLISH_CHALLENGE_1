@@ -1,7 +1,16 @@
 "use strict";
 
-// Public Google Apps Script web app URL. The deployment must allow access to anyone.
-const REGISTRATION_ENDPOINT = "https://script.google.com/macros/s/AKfycbxVBtUtfIN50qY2bCz9SPfh7QvFLlCI9I-vt_pMrjtOaBnMf5vmiGrwn9YwmGrSxdoBvA/exec";
+// ==================== CONFIGURACIÓN MULTI-PROFESOR ====================
+const scriptsProfesores = {
+  "sergiojodral": "https://script.google.com/macros/s/AKfycbxVBtUtfIN50qY2bCz9SPfh7QvFLlCI9I-vt_pMrjtOaBnMf5vmiGrwn9YwmGrSxdoBvA/exec",
+  "israeladamuz": "https://script.google.com/macros/s/AKfycbxJf4nyOdlPUY6f-aVgIeUxQtRNm7RFX28JgFtyO49_FbrjZ2nkydhakQu0sHIHbEBD/exec"
+};
+
+const parametrosURL = new URLSearchParams(window.location.search);
+const profeAsignado = parametrosURL.get('profe');
+
+// Si el alumno entra sin ?profe=... o pone un nombre que no existe, esto quedará vacío
+const REGISTRATION_ENDPOINT = scriptsProfesores[profeAsignado];
 
 // ==================== EDITABLE BANK ====================
 // Vocabulary creates more than 120 distinct challenge objects (translation and scramble forms).
@@ -129,10 +138,14 @@ async function registerFinalResult(percentage) {
   if (state.resultSent) return;
   state.resultSent = true;
   elements.registrationStatus.textContent = "Sending your result to your teacher…";
+
+  // Convertimos la nota a texto y cambiamos el punto por la coma para arreglar el error en Google Sheets
+  const notaConComa = (state.correct / state.session.total * 10).toFixed(2).replace('.', ',');
+
   const payload = {
     accion: "guardar",
     pin: state.studentPin,
-    notaNumerica: Number((state.correct / state.session.total * 10).toFixed(1)),
+    notaNumerica: notaConComa,
     aciertos: state.correct,
     errores: state.incorrect,
     porcentaje: percentage,
