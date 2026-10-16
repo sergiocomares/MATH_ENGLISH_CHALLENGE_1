@@ -116,7 +116,24 @@ async function startChallenge(event) {
   }
 }
 
-function verifyStudentPin(pin) {
+async function verifyStudentPin(pin) {
+  const verificationUrl = new URL(REGISTRATION_ENDPOINT);
+  verificationUrl.search = new URLSearchParams({ accion:"verificar", pin, callback:"pinVerification" });
+
+  try {
+    const response = await fetch(verificationUrl);
+    if (!response.ok) throw new Error(`PIN verification failed with status ${response.status}.`);
+    const responseText = await response.text();
+    const start = responseText.indexOf("(");
+    const end = responseText.lastIndexOf(")");
+    if (start === -1 || end <= start) throw new Error("The registration service returned an invalid response.");
+    return JSON.parse(responseText.slice(start + 1, end));
+  } catch (fetchError) {
+    return verifyStudentPinWithJsonp(verificationUrl);
+  }
+}
+
+function verifyStudentPinWithJsonp(verificationUrl) {
   return new Promise((resolve, reject) => {
     const callbackName = "__mathPinCallback_" + Math.random().toString(36).slice(2);
     const script = document.createElement("script");
@@ -129,7 +146,8 @@ function verifyStudentPin(pin) {
     }
     window[callbackName] = data => finish(null, data);
     script.onerror = () => finish(new Error("The registration service is unavailable. Please ask your teacher to enable public access to it."));
-    script.src = REGISTRATION_ENDPOINT + "?accion=verificar&pin=" + encodeURIComponent(pin) + "&callback=" + callbackName;
+    verificationUrl.searchParams.set("callback", callbackName);
+    script.src = verificationUrl;
     document.head.appendChild(script);
   });
 }
