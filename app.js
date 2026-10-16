@@ -7,9 +7,9 @@ const scriptsProfesores = {
 };
 
 const parametrosURL = new URLSearchParams(window.location.search);
-const profeAsignado = parametrosURL.get('profe');
+const profeAsignado = parametrosURL.get('profe') || "sergiojodral";
 
-// Si el alumno entra sin ?profe=... o pone un nombre que no existe, esto quedará vacío
+// La URL general usa el registro de Sergio; ?profe=israeladamuz selecciona el de Israel.
 const REGISTRATION_ENDPOINT = scriptsProfesores[profeAsignado];
 
 // ==================== EDITABLE BANK ====================
