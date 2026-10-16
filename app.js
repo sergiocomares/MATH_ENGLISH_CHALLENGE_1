@@ -120,7 +120,7 @@ function verifyStudentPin(pin) {
   return new Promise((resolve, reject) => {
     const callbackName = "__mathPinCallback_" + Math.random().toString(36).slice(2);
     const script = document.createElement("script");
-    const timeout = setTimeout(() => finish(new Error("PIN check timed out. Please try again.")), 12000);
+    const timeout = setTimeout(() => finish(new Error("PIN check timed out. Please try again.")), 25000);
     function finish(error, data) {
       clearTimeout(timeout);
       delete window[callbackName];
